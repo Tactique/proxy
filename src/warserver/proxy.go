@@ -167,7 +167,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
         return
     }
     ws.SetReadLimit(RECV_BUF_LEN)
-    conn := connection.NewWebsocketConn(ws)
+    conn := NewWebsocketConn(ws)
     gamehub.connRegister<- conn
 }
 
