@@ -69,9 +69,10 @@ func (p *proxy) handleWebsocket(message []byte, cconn *clientConnection) {
 }
 
 func appendClientInfo(message []byte, info clientInfo) []byte {
+    splitMsg := strings.SplitN(string(message), ":", 2)
     // This will be disagreed with...
     clientIdStr := strconv.Itoa(info.Id)
-    return append(message, []byte(":" + clientIdStr)...)
+    return append([]byte(splitMsg[0]), []byte(":" + clientIdStr + ":" + splitMsg[1])...)
 }
 
 func (p *proxy) serverReadPump() {
