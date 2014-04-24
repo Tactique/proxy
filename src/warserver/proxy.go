@@ -60,11 +60,18 @@ func (p *proxy) removeClientConnection(pos int) {
 }
 
 func (p *proxy) handleWebsocket(message []byte, cconn *clientConnection) {
+    message = appendClientInfo(message, cconn.info)
     logger.Infof("Proxying message from client: %s", message)
     err := p.server.conn.Write(message)
     if err != nil {
         logger.Errorf("Error while writing to socket: %s", err)
     }
+}
+
+func appendClientInfo(message []byte, info clientInfo) []byte {
+    // This will be disagreed with...
+    clientIdStr := strconv.Itoa(info.Id)
+    return append(message, []byte(":" + clientIdStr)...)
 }
 
 func (p *proxy) serverReadPump() {
