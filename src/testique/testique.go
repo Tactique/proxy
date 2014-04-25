@@ -43,22 +43,21 @@ func testNewGame(msg string) string {
 }
 
 func testViewWorld(msg string) string {
-    unit := "{\"unit\":{\"loc\":{\"x\": 1, \"y\": 2}," +
-                       "\"name\": \"Tank\"," +
-                       "\"nation\": \"0\"," +
-                       "\"distance\": 5," +
-                       "\"movement\":{" +
-                            "\"speeds\":{\"0\":1}," +
-                            "\"name\":\"treads\"" +
-                                    "}" +
-                     "}" +
+    unit := "{\"position\":{\"x\": 1, \"y\": 2}," +
+             "\"name\": \"Tank\"," +
+             "\"nation\": \"0\"," +
+             "\"distance\": 5," +
+             "\"movement\":{" +
+                 "\"speeds\":{\"0\":1}," +
+                 "\"name\":\"treads\"" +
+                          "}" +
             "}"
-    return "view:success:{\"world\":{\"terrain\":[[0,0,0,0,0,0,0,0,0,0]," +
-                                                 "[0,0,0,0,0,0,0,0,0,0]," +
-                                                 "[0,0,0,0,0,0,0,0,0,0]," +
-                                                 "[0,0,0,0,0,0,0,0,0,0]," +
-                                                 "[0,0,0,0,0,0,0,0,0,0]]," +
-                                    "\"units\": [" + unit + "]}}"
+    return "view:success:{\"terrain\":[[0,0,0,0,0,0,0,0,0,0]," +
+                                      "[0,0,0,0,0,0,0,0,0,0]," +
+                                      "[0,0,0,0,0,0,0,0,0,0]," +
+                                      "[0,0,0,0,0,0,0,0,0,0]," +
+                                      "[0,0,0,0,0,0,0,0,0,0]]," +
+                         "\"units\": [" + unit + "]}"
 }
 
 func testMoveUnit(msg string) string {
