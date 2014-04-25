@@ -45,11 +45,12 @@ func testNewGame(msg string) string {
 func testViewWorld(msg string) string {
     unit := "{\"position\":{\"x\": 1, \"y\": 2}," +
              "\"name\": \"Tank\"," +
-             "\"nation\": \"0\"," +
+             "\"nation\": 0," +
+             "\"health\": 10," +
              "\"distance\": 5," +
              "\"movement\":{" +
                  "\"speeds\":{\"0\":1}," +
-                 "\"name\":\"treads\"" +
+                 "\"type\":\"treads\"" +
                           "}" +
             "}"
     return "view:success:{\"terrain\":[[0,0,0,0,0,0,0,0,0,0]," +
