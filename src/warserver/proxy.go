@@ -14,6 +14,7 @@ import (
 
 const (
     RECV_BUF_LEN = 1024
+    REVIEW_COMMAND = "review:now"
 )
 
 type websocketHandler interface {
@@ -23,6 +24,9 @@ type websocketHandler interface {
 type clientInfo struct {
     Id int
 }
+
+// this should be a const, but is that possible?
+var BROADCAST_CLIENT = clientInfo{0}
 
 type clientConnection struct {
     conn connection.Connection
@@ -91,9 +95,30 @@ func (p *proxy) serverReadPump() {
 }
 
 func (p *proxy) broadcast(message []byte) {
+    client, filteredMsg := filterClientInfo(message)
     for i := 0; i < len(p.proxyConns); i++ {
-        p.proxyConns[i].toClient <- message
+        if client == BROADCAST_CLIENT || client == p.proxyConns[i].info {
+            p.proxyConns[i].toClient <- filteredMsg
+        } else {
+            // This should be a struct
+            p.proxyConns[i].toClient <- []byte(REVIEW_COMMAND)
+        }
     }
+}
+
+func filterClientInfo(message []byte) (clientInfo, []byte) {
+    splitMsg := strings.SplitN(string(message), ":", 3)
+    // if the message does not contain a client Id, it will only split once
+    if len(splitMsg) == 2 {
+        return BROADCAST_CLIENT, message
+    }
+    // If the client id does not parse correctly, we're in big trouble
+    clientId, err := strconv.Atoi(splitMsg[1])
+    if err != nil {
+        return BROADCAST_CLIENT, message
+    }
+    filteredMsg := append([]byte(splitMsg[0]), []byte(":" + splitMsg[2])...)
+    return clientInfo{clientId}, filteredMsg
 }
 
 func (p *proxy) sendInitialGameInfo() {
