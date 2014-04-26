@@ -92,7 +92,7 @@ func (gh *game_hub) handleConnections() {
 }
 
 func (gh *game_hub) makeGame(numPlayers int) *game {
-    proxy := proxy{proxyConns: make([]*clientConnection, numPlayers)}
+    proxy := *newProxy(numPlayers)
     game := game{numPlayers: numPlayers, currentPlayers: 0,
                  proxy: &proxy}
     gh.uncommittedGames[numPlayers] = &game

@@ -50,6 +50,11 @@ type proxy struct {
     server *serverConnection
 }
 
+func newProxy(numPlayers int) *proxy {
+    proxy := proxy{proxyConns: make([]*clientConnection, numPlayers)}
+    return &proxy;
+}
+
 func (p *proxy) slotClientConnection(slot int, cconn *clientConnection) {
     p.proxyConns[slot] = cconn;
 }
