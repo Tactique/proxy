@@ -17,12 +17,14 @@ type newGame struct {
     cconn *clientConnection
 }
 
+type localHandler func(message string, cconn *clientConnection)
+
 type game_hub struct {
     gameRequests chan *newGame
     uncommittedGames map[int]*game
     committedGames *list.List
     connRegister chan connection.Connection
-    localHandlers map[string]func(message string, cconn *clientConnection)
+    localHandlers map[string]localHandler
 }
 
 func (gh *game_hub) handleWebsocket(message []byte, cconn *clientConnection) {
@@ -147,7 +149,7 @@ var gamehub = game_hub {
     uncommittedGames: make(map [int]*game),
     committedGames: list.New(),
     connRegister: make(chan connection.Connection),
-    localHandlers: make(map [string]func(message string, cconn *clientConnection)),
+    localHandlers: make(map [string]localHandler),
 }
 
 
