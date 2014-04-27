@@ -53,7 +53,7 @@ func testViewWorld(msg string) string {
                  "\"type\":\"treads\"" +
                           "}" +
             "}"
-    return "view:success:{\"terrain\":[[0,0,0,0,0,0,0,0,0,0]," +
+    return "view:0:success:{\"terrain\":[[0,0,0,0,0,0,0,0,0,0]," +
                                       "[0,0,0,0,0,0,0,0,0,0]," +
                                       "[0,0,0,0,0,0,0,0,0,0]," +
                                       "[0,0,0,0,0,0,0,0,0,0]," +

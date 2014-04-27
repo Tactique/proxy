@@ -114,7 +114,7 @@ func (p *proxy) broadcast(message []byte) {
 func filterClientInfo(message []byte) (clientInfo, []byte) {
     splitMsg := strings.SplitN(string(message), ":", 3)
     // if the message does not contain a client Id, it will only split once
-    if len(splitMsg) == 2 {
+    if len(splitMsg) <= 2 {
         return BROADCAST_CLIENT, message
     }
     // If the client id does not parse correctly, we're in big trouble
