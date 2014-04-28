@@ -70,7 +70,7 @@ func (gh *game_hub) handleDisconnection(message string, cconn *clientConnection)
     logger.Info("Client Disconnected. Cleaning up...")
     for np, game := range gh.uncommittedGames {
         for i := 0; i < game.currentPlayers; i++ {
-            if game.proxy.proxyConns[i].info.Id == cconn.info.Id {
+            if game.proxy.proxyConns[i].info.id == cconn.info.id {
                 game.proxy.removeClientConnection(i)
                 game.currentPlayers -= 1
                 if game.currentPlayers == 0 {

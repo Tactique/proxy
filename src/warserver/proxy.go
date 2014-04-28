@@ -22,11 +22,12 @@ type websocketHandler interface {
 }
 
 type clientInfo struct {
-    Id int
+    id int
+    Token string
 }
 
 // this should be a const, but is that possible?
-var BROADCAST_CLIENT = clientInfo{0}
+var BROADCAST_CLIENT = clientInfo{0, ""}
 
 type clientConnection struct {
     conn connection.Connection
@@ -80,7 +81,7 @@ func (p *proxy) handleWebsocket(message []byte, cconn *clientConnection) {
 func appendClientInfo(message []byte, info clientInfo) []byte {
     splitMsg := strings.SplitN(string(message), ":", 2)
     // This will be disagreed with...
-    clientIdStr := strconv.Itoa(info.Id)
+    clientIdStr := strconv.Itoa(info.id)
     return append([]byte(splitMsg[0]), []byte(":" + clientIdStr + ":" + splitMsg[1])...)
 }
 
@@ -123,14 +124,14 @@ func filterClientInfo(message []byte) (clientInfo, []byte) {
         return BROADCAST_CLIENT, message
     }
     filteredMsg := append([]byte(splitMsg[0]), []byte(":" + splitMsg[2])...)
-    return clientInfo{clientId}, filteredMsg
+    return clientInfo{clientId, ""}, filteredMsg
 }
 
 func (p *proxy) sendInitialGameInfo() {
     // I'll send basically this once the server can accept it
     message := "new:{\"uids\": ["
     for i := 0; i < len(p.proxyConns); i++ {
-        message = message + strconv.Itoa(p.proxyConns[i].info.Id)
+        message = message + strconv.Itoa(p.proxyConns[i].info.id)
         if (i < (len(p.proxyConns) - 1)) {
             message = message + ", "
         }
@@ -149,7 +150,7 @@ func (pc *clientConnection) wsReadPump() {
         if err != nil {
             if err == io.EOF || err == io.ErrUnexpectedEOF {
                 // the client ID here is redundant...
-                killcconn := fmt.Sprintf("killClient:{\"Id\": %d}", pc.info.Id)
+                killcconn := fmt.Sprintf("killClient:{\"Id\": %d}", pc.info.id)
                 pc.currentHandler.handleWebsocket([]byte(killcconn), pc)
             } else {
                 logger.Errorf("Error while reading from websocket: %s", err)
