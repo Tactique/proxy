@@ -3,9 +3,13 @@ package warserver
 import (
     "container/list"
     "encoding/json"
+    "errors"
+    "fmt"
+    "os"
     "strings"
     "warserver/logger"
     "github.com/DomoCo/connection"
+    "code.google.com/p/go-sqlite/go1/sqlite3"
 )
 
 const (
@@ -49,8 +53,43 @@ func (gh *game_hub) handleClientInfo(message string, cconn *clientConnection) {
         logger.Warnf("Error unmarshalling json: %s", err)
         return
     }
+    userid, err := getClientIdFromToken(ci.Token)
+    if err != nil {
+        logger.Errorf("Error querying database: %s", err)
+        cconn.toClient <- []byte("clientinfo:failure")
+        return
+    }
+    ci.id = userid
     cconn.info = ci
     cconn.toClient <- []byte("clientinfo:success")
+}
+
+func getClientIdFromToken(token string) (int, error) {
+    dbPath := os.Getenv("DOMOROOT") + "/domoweb/db.sqlite3"
+    db, err := sqlite3.Open(dbPath)
+    if err != nil {
+        logger.Fatalf("%s", err)
+    }
+    defer db.Close()
+
+    sql := fmt.Sprintf("select id, userid from interface_logindata where token='%s';", token)
+    for rows, err := db.Query(sql); err == nil; rows.Next() {
+        var rowId int
+        var userId int
+        err := rows.Scan(&rowId, &userId)
+        if err != nil {
+            return 0, err
+        }
+        deleteRow := fmt.Sprintf("delete from interface_logindata where id='%s';", rowId)
+        err = db.Exec(deleteRow)
+        if err != nil {
+            return 0, err
+        }
+
+        return userId, nil
+    }
+
+    return 0, errors.New("SQL query totally failed")
 }
 
 func (gh *game_hub) handleNewGame(message string, cconn *clientConnection) {
