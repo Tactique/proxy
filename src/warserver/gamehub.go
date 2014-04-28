@@ -74,6 +74,7 @@ func getClientIdFromToken(token string) (int, error) {
 
     sql := fmt.Sprintf("select id, userid from interface_logindata where token='%s';", token)
     for rows, err := db.Query(sql); err == nil; rows.Next() {
+        defer rows.Close()
         var rowId int
         var userId int
         err := rows.Scan(&rowId, &userId)
