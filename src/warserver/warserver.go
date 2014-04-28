@@ -2,6 +2,7 @@ package warserver
 
 import (
     "flag"
+    "os"
     "warserver/logger"
     "warserver/PortMgmt"
     "net/http"
@@ -26,7 +27,12 @@ func Main() {
     porterPort = PortMgmt.NewPortInfo(*porterPortString)
     porterIP = PortMgmt.IPString(*porterIPString)
 
+
     logger.SetupLoggerHelper(*logpath)
+
+    if !verifyEnvironment() {
+        logger.Fatalf("Please set $DOMOROOT to your project root")
+    }
     setupGamehub()
 
     go gamehub.handleConnections()
@@ -41,4 +47,8 @@ func Main() {
     if err != nil {
         logger.Fatalf("ListenAndServe: %s", err.Error())
     }
+}
+
+func verifyEnvironment() bool {
+    return os.Getenv("DOMOROOT") != ""
 }
