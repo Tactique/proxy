@@ -71,7 +71,8 @@ func chatHandler(data []byte, cconn *clientConnection, proxy *proxy) {
 	var request ChatPacket
 	err := json.Unmarshal(data, &request)
 	if err != nil {
-		// malformed json
+		logger.Errorf("Malformed chat json: %s", data)
+		return
 	}
 	resp := response{0, request}
 	out := CommandMarshal("chat", resp)
