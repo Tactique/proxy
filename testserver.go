@@ -1,9 +1,9 @@
 package main
 
 import (
-    "testique"
+	"testique"
 )
 
 func main() {
-    testique.Main()
+	testique.Main()
 }

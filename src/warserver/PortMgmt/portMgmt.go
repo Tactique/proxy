@@ -1,18 +1,18 @@
 package PortMgmt
 
 import (
-    "strings"
+	"strings"
 )
 
 type PortInfo struct {
-    Port string
+	Port string
 }
 
 type IPString string
 
 func NewPortInfo(portstring string) PortInfo {
-    if (strings.Contains(portstring, ":")) {
-        return PortInfo{Port: portstring}
-    }
-    return PortInfo{Port: ":" + portstring}
+	if strings.Contains(portstring, ":") {
+		return PortInfo{Port: portstring}
+	}
+	return PortInfo{Port: ":" + portstring}
 }

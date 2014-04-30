@@ -1,9 +1,9 @@
 package main
 
 import (
-    "warserver"
+	"warserver"
 )
 
 func main() {
-    warserver.Main()
+	warserver.Main()
 }
