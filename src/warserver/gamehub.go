@@ -31,6 +31,20 @@ type game_hub struct {
 	localHandlers    map[string]localHandler
 }
 
+type response struct {
+	Status  int         `json:"status"`
+	Payload interface{} `json:"payload"`
+}
+
+func CommandMarshal(cmd string, payload interface{}) []byte {
+	body, err := json.Marshal(payload)
+	if err != nil {
+		logger.Warnf("Error marshalling json: ", err)
+		return nil
+	}
+	return append([]byte(cmd+":"), body...)
+}
+
 func (gh *game_hub) handleWebsocket(message []byte, cconn *clientConnection) {
 	cmds := strings.SplitN(string(message), ":", 2)
 	if len(cmds) == 2 {
@@ -47,6 +61,7 @@ func (gh *game_hub) handleWebsocket(message []byte, cconn *clientConnection) {
 
 func (gh *game_hub) handleClientInfo(message string, cconn *clientConnection) {
 	ci := clientInfo{}
+	resp := response{0, nil}
 	// I hate repeating this unmarshalling code, does Go allow something more general?
 	err := json.Unmarshal([]byte(message), &ci)
 	if err != nil {
@@ -56,12 +71,13 @@ func (gh *game_hub) handleClientInfo(message string, cconn *clientConnection) {
 	userid, err := getClientIdFromToken(ci.Token)
 	if err != nil {
 		logger.Errorf("Error querying database: %s", err)
-		cconn.toClient <- []byte("clientinfo:{\"status\": -1}")
+		resp.Status = -1
+		cconn.toClient <- CommandMarshal("clientinfo", resp)
 		return
 	}
 	ci.id = userid
 	cconn.info = ci
-	cconn.toClient <- []byte("clientinfo:{\"status\": 0}")
+	cconn.toClient <- CommandMarshal("clientinfo", resp)
 }
 
 func getClientIdFromToken(token string) (int, error) {

@@ -1,7 +1,6 @@
 package warserver
 
 import (
-	"fmt"
 	"github.com/DomoCo/connection"
 	"github.com/gorilla/websocket"
 	"io"
@@ -24,6 +23,15 @@ type websocketHandler interface {
 type clientInfo struct {
 	id    int
 	Token string
+}
+
+type initialGameInfo struct {
+	Uids  []int `json:"uids"`
+	Debug int   `json:"debug"`
+}
+
+type killClient struct {
+	Id int
 }
 
 // this should be a const, but is that possible?
@@ -129,14 +137,12 @@ func filterClientInfo(message []byte) (clientInfo, []byte) {
 
 func (p *proxy) sendInitialGameInfo() {
 	// I'll send basically this once the server can accept it
-	message := "new:{\"uids\": ["
-	for i := 0; i < len(p.proxyConns); i++ {
-		message = message + strconv.Itoa(p.proxyConns[i].info.id)
-		if i < (len(p.proxyConns) - 1) {
-			message = message + ", "
-		}
+	uids := make([]int, len(p.proxyConns))
+	for i, v := range p.proxyConns {
+		uids[i] = v.info.id
 	}
-	message = message + "], \"debug\": 0}"
+	gi := initialGameInfo{uids, 0}
+	message := CommandMarshal("new", gi)
 	logger.Infof("%s", message)
 	p.server.conn.Write([]byte(message))
 }
@@ -150,7 +156,8 @@ func (pc *clientConnection) wsReadPump() {
 		if err != nil {
 			if err == io.EOF || err == io.ErrUnexpectedEOF {
 				// the client ID here is redundant...
-				killcconn := fmt.Sprintf("killClient:{\"Id\": %d}", pc.info.id)
+				kc := killClient{pc.info.id}
+				killcconn := CommandMarshal("killClient", kc)
 				pc.currentHandler.handleWebsocket([]byte(killcconn), pc)
 			} else {
 				logger.Errorf("Error while reading from websocket: %s", err)
