@@ -56,12 +56,12 @@ func (gh *game_hub) handleClientInfo(message string, cconn *clientConnection) {
     userid, err := getClientIdFromToken(ci.Token)
     if err != nil {
         logger.Errorf("Error querying database: %s", err)
-        cconn.toClient <- []byte("clientinfo:failure")
+        cconn.toClient <- []byte("clientinfo:{\"status\": -1}")
         return
     }
     ci.id = userid
     cconn.info = ci
-    cconn.toClient <- []byte("clientinfo:success")
+    cconn.toClient <- []byte("clientinfo:{\"status\": 0}")
 }
 
 func getClientIdFromToken(token string) (int, error) {
