@@ -1,6 +1,7 @@
 package warserver
 
 import (
+	"encoding/json"
 	"github.com/DomoCo/connection"
 	"github.com/gorilla/websocket"
 	"io"
@@ -19,6 +20,8 @@ const (
 type websocketHandler interface {
 	handleWebsocket(message []byte, cconn *clientConnection)
 }
+
+type proxyHandler func(data []byte, cconn *clientConnection, proxy *proxy)
 
 type clientInfo struct {
 	id    int
@@ -55,13 +58,37 @@ type pipe struct {
 }
 
 type proxy struct {
-	proxyConns []*clientConnection
-	server     *serverConnection
+	proxyConns    []*clientConnection
+	server        *serverConnection
+	localHandlers map[string]proxyHandler
+}
+
+type ChatPacket struct {
+	Message string `json:"message"`
+}
+
+func chatHandler(data []byte, cconn *clientConnection, proxy *proxy) {
+	var request ChatPacket
+	err := json.Unmarshal(data, &request)
+	if err != nil {
+		// malformed json
+	}
+	resp := response{0, request}
+	out := CommandMarshal("chat", resp)
+	proxy.broadcast(out)
 }
 
 func newProxy(numPlayers int) *proxy {
-	proxy := proxy{proxyConns: make([]*clientConnection, numPlayers)}
+	proxy := proxy{
+		proxyConns:    make([]*clientConnection, numPlayers),
+		localHandlers: make(map[string]proxyHandler),
+	}
+	proxy.registerLocalHandler("chat", chatHandler)
 	return &proxy
+}
+
+func (p *proxy) registerLocalHandler(command string, handler proxyHandler) {
+	p.localHandlers[command] = handler
 }
 
 func (p *proxy) slotClientConnection(slot int, cconn *clientConnection) {
@@ -78,19 +105,26 @@ func (p *proxy) removeClientConnection(pos int) {
 }
 
 func (p *proxy) handleWebsocket(message []byte, cconn *clientConnection) {
-	message = appendClientInfo(message, cconn.info)
+	splitMsg := strings.SplitN(string(message), ":", 2)
+	command := splitMsg[0]
+	data := splitMsg[1]
+	localHandler, ok := p.localHandlers[command]
+	if ok {
+		localHandler([]byte(data), cconn, p)
+		return
+	}
 	logger.Infof("Proxying message from client: %s", message)
+	message = appendClientInfo(command, data, cconn.info)
 	err := p.server.conn.Write(message)
 	if err != nil {
 		logger.Errorf("Error while writing to socket: %s", err)
 	}
 }
 
-func appendClientInfo(message []byte, info clientInfo) []byte {
-	splitMsg := strings.SplitN(string(message), ":", 2)
+func appendClientInfo(command string, data string, info clientInfo) []byte {
 	// This will be disagreed with...
 	clientIdStr := strconv.Itoa(info.id)
-	return append([]byte(splitMsg[0]), []byte(":"+clientIdStr+":"+splitMsg[1])...)
+	return append([]byte(command), []byte(":"+clientIdStr+":"+data)...)
 }
 
 func (p *proxy) serverReadPump() {
