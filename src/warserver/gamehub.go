@@ -1,7 +1,8 @@
 package warserver
 
 import (
-	"code.google.com/p/go-sqlite/go1/sqlite3"
+	"database/sql"
+	_ "github.com/mattn/go-sqlite3"
 	"container/list"
 	"encoding/json"
 	"errors"
@@ -82,31 +83,36 @@ func (gh *game_hub) handleClientInfo(message string, cconn *clientConnection) {
 
 func getClientIdFromToken(token string) (int, error) {
 	dbPath := os.Getenv("DOMOROOT") + "/domoweb/db.sqlite3"
-	db, err := sqlite3.Open(dbPath)
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		logger.Fatalf("%s", err)
 	}
 	defer db.Close()
 
 	sql := fmt.Sprintf("select id, userid from interface_logindata where token='%s';", token)
-	for rows, err := db.Query(sql); err == nil; rows.Next() {
-		defer rows.Close()
-		var rowId int
-		var userId int
+	rows, err := db.Query(sql)
+	if err != nil {
+		return 0, err
+	}
+	var rowId int
+	var userId int
+	if rows.Next() {
 		err := rows.Scan(&rowId, &userId)
 		if err != nil {
 			return 0, err
 		}
-		deleteRow := fmt.Sprintf("delete from interface_logindata where id='%s';", rowId)
-		err = db.Exec(deleteRow)
-		if err != nil {
-			return 0, err
-		}
-
-		return userId, nil
+	}
+	if rows.Next() {
+		return 0, errors.New("More than one entry returned in user query")
+	}
+	rows.Close()
+	deleteRow := fmt.Sprintf("delete from interface_logindata where id='%s';", rowId)
+	_, err = db.Exec(deleteRow)
+	if err != nil {
+		return 0, err
 	}
 
-	return 0, errors.New("SQL query totally failed")
+	return userId, nil
 }
 
 func (gh *game_hub) handleNewGame(message string, cconn *clientConnection) {
