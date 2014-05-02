@@ -73,12 +73,12 @@ func (gh *game_hub) handleClientInfo(message string, cconn *clientConnection) {
 	if err != nil {
 		logger.Errorf("Error querying database: %s", err)
 		resp.Status = -1
-		cconn.toClient <- CommandMarshal("clientinfo", resp)
+		cconn.toClient <- CommandMarshal("clientInfo", resp)
 		return
 	}
 	ci.id = userid
 	cconn.info = ci
-	cconn.toClient <- CommandMarshal("clientinfo", resp)
+	cconn.toClient <- CommandMarshal("clientInfo", resp)
 }
 
 func getClientIdFromToken(token string) (int, error) {
