@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 	"warserver/PortMgmt"
-	"warserver/logger"
+    "github.com/Tactique/golib/logger"
 )
 
 var port PortMgmt.PortInfo

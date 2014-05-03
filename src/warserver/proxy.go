@@ -3,13 +3,13 @@ package warserver
 import (
 	"encoding/json"
 	"github.com/Tactique/golib/connection"
+	"github.com/Tactique/golib/logger"
 	"github.com/gorilla/websocket"
 	"io"
 	"net"
 	"net/http"
 	"strconv"
 	"strings"
-	"warserver/logger"
 )
 
 const (

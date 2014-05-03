@@ -6,7 +6,7 @@ import (
 	"net"
 	"strings"
 	"warserver/PortMgmt"
-	"warserver/logger"
+    "github.com/Tactique/golib/logger"
 )
 
 const (

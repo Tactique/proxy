@@ -8,9 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Tactique/golib/connection"
+	"github.com/Tactique/golib/logger"
 	"os"
 	"strings"
-	"warserver/logger"
 )
 
 const (
