@@ -2,7 +2,7 @@ package warserver
 
 import (
 	"encoding/json"
-	"github.com/DomoCo/connection"
+	"github.com/Tactique/golib/connection"
 	"github.com/gorilla/websocket"
 	"io"
 	"net"

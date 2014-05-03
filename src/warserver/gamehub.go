@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/DomoCo/connection"
+	"github.com/Tactique/golib/connection"
 	"os"
 	"strings"
 	"warserver/logger"

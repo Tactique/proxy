@@ -2,7 +2,7 @@ package testique
 
 import (
 	"flag"
-	"github.com/DomoCo/connection"
+	"github.com/Tactique/golib/connection"
 	"net"
 	"strings"
 	"warserver/PortMgmt"
