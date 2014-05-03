@@ -1,14 +1,14 @@
 package warserver
 
 import (
-	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
 	"container/list"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/Tactique/golib/connection"
 	"github.com/Tactique/golib/logger"
+	_ "github.com/mattn/go-sqlite3"
 	"os"
 	"strings"
 )

@@ -3,10 +3,10 @@ package testique
 import (
 	"flag"
 	"github.com/Tactique/golib/connection"
+	"github.com/Tactique/golib/logger"
 	"net"
 	"strings"
 	"warserver/PortMgmt"
-    "github.com/Tactique/golib/logger"
 )
 
 const (
