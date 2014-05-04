@@ -82,7 +82,7 @@ func (gh *game_hub) handleClientInfo(message string, cconn *clientConnection) {
 }
 
 func getClientIdFromToken(token string) (int, error) {
-	dbPath := os.Getenv("DOMOROOT") + "/webserver/db.sqlite3"
+	dbPath := os.Getenv("ROOTIQUE") + "/webserver/db.sqlite3"
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		logger.Fatalf("%s", err)

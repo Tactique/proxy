@@ -29,7 +29,7 @@ func Main() {
 	logger.SetupLoggerHelper(*logpath)
 
 	if !verifyEnvironment() {
-		logger.Fatalf("Please set $DOMOROOT to your project root")
+		logger.Fatalf("Please set $ROOTIQUE to your project root")
 	}
 	setupGamehub()
 
@@ -48,5 +48,5 @@ func Main() {
 }
 
 func verifyEnvironment() bool {
-	return os.Getenv("DOMOROOT") != ""
+	return os.Getenv("ROOTIQUE") != ""
 }
