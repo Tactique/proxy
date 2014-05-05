@@ -2,4 +2,5 @@
 pkg
 src/github.com
 proxy
+tactique_proxy
 proxy.log
