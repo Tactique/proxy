@@ -185,7 +185,12 @@ func (gh *game_hub) commitGame(game *game) {
 func (gh *game_hub) processNewGameRequests() {
 	for ng := range gh.gameRequests {
 		// look for an existing game to satisfy the new request
-		gm := gh.findGame(ng)
+		gm, err := gh.findGame(ng)
+		// an error here implies duplicate player ids in game requests
+		if err != nil {
+			logger.Warnf("Player with id %d attempted a \"self\" game", ng.cconn.info.id)
+			return
+		}
 		// create a game if one can't be found
 		if gm == nil {
 			logger.Info("Couldn't find an available game. Creating a new one")
@@ -201,9 +206,20 @@ func (gh *game_hub) processNewGameRequests() {
 	}
 }
 
-func (gh *game_hub) findGame(ng *newGame) *game {
+func (gh *game_hub) findGame(ng *newGame) (*game, error) {
 	game := gh.uncommittedGames[ng.NumPlayers]
-	return game
+	if game != nil {
+		// we have to make sure a player isn't trying to start a game against themselves
+		for i := range game.proxy.proxyConns {
+			client := game.proxy.proxyConns[i]
+			if client != nil {
+				if client.info.id == ng.cconn.info.id {
+					return nil, errors.New("Duplicate playerId new game request")
+				}
+			}
+		}
+	}
+	return game, nil
 }
 
 var gamehub = game_hub{
